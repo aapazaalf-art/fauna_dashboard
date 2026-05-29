@@ -40,10 +40,9 @@ def plot_spatial_richness(df: pd.DataFrame):
                  color='Riqueza de Especies', color_continuous_scale='Tealgrn', text_auto=True)
     fig.update_layout(xaxis_title="Ecozona", yaxis_title="Cantidad de Especies Únicas (Riqueza)", title_x=0.5)
     st.plotly_chart(fig, use_container_width=True)
-    st.caption("📌 Representa la diversidad observada por ecozona. Para mapas UTM georreferenciados se requiere datum específico.")
+    st.caption("📌 Representa la diversidad observada por ecozona. Para mapas georreferenciados se requiere datum específico.")
 
 def plot_hierarchical_distribution(df: pd.DataFrame):
-    """Treemap mejorado: colores vivos, texto oscuro contrastante, numeración centrada."""
     st.subheader("🌳 Composición: Ecozona → Departamento → Familia")
     if df.empty: return st.warning("Sin datos para visualización jerárquica.")
     
@@ -58,9 +57,8 @@ def plot_hierarchical_distribution(df: pd.DataFrame):
     fig = px.treemap(
         df_plot, path=['Ecozona', 'Departamento', 'Familia'], values='Valor',
         title=f"Concentración por {metric}", color='Ecozona',
-        color_discrete_sequence=px.colors.qualitative.Bold  # 🎨 Paleta viva y de alto contraste
+        color_discrete_sequence=px.colors.qualitative.Bold
     )
-    # 🔤 Texto oscuro, legible y centrado
     fig.update_traces(
         texttemplate='%{label}<br>%{value:.0f}', 
         textposition='middle center',
@@ -70,12 +68,10 @@ def plot_hierarchical_distribution(df: pd.DataFrame):
     st.plotly_chart(fig, use_container_width=True)
 
 def plot_cua_species(df: pd.DataFrame):
-    """Nueva sección: CUA y distribución de especies."""
     st.subheader("📊 CUA y Distribución de Especies")
     if df.empty or 'CUA' not in df.columns:
         return st.warning("Sin datos para CUA.")
     
-    # Agregación: conteo de especies únicas por CUA
     cua_agg = df.groupby('CUA')['Nombre científico'].nunique().reset_index(name='Especies Únicas')
     cua_agg = cua_agg.sort_values('Especies Únicas', ascending=False)
     
