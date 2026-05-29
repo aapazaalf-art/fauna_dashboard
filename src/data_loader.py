@@ -3,11 +3,8 @@ import streamlit as st
 
 @st.cache_data
 def load_raw_data(filepath: str) -> pd.DataFrame:
-    """Carga el Excel desde la ruta especificada."""
     try:
-        df = pd.read_excel(filepath)
-        return df
+        return pd.read_excel(filepath)
     except Exception as e:
-        st.error(f"Error al cargar {filepath}: {e}")
-        st.stop()
+        st.error(f"❌ Error al cargar {filepath}: {e}")
         return pd.DataFrame()
