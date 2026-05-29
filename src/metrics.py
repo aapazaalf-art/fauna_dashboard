@@ -1,4 +1,5 @@
 def compute_kpis(df: pd.DataFrame) -> dict:
+    """Calcula indicadores clave recalculables según filtros."""
     total_records = len(df)
     unique_species = df['Nombre científico'].nunique()
     unique_families = df['Familia'].nunique()
