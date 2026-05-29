@@ -2,20 +2,21 @@ import pandas as pd
 import numpy as np
 
 def preprocess_fauna(df: pd.DataFrame) -> pd.DataFrame:
+    """Limpieza, tipado seguro y creación de variables derivadas."""
     df = df.copy()
     
-    # 1. Normalizar texto
+    # 1. Normalizar texto (strip, manejar NaN/strings vacíos)
     for col in df.select_dtypes(include=['object']).columns:
         df[col] = df[col].astype(str).str.strip()
         df[col] = df[col].replace(['nan', 'NaN', 'None', ''], np.nan)
 
-    # 2. Convertir numéricos
-    num_cols = ['Mes', 'Año', 'X-UTM', 'Y-UTM', 'Altitud (m)', 'Distancia (m)']
+    # 2. Convertir columnas numéricas de forma segura
+    num_cols = ['Mes', 'Año', 'X-UTM', 'Y-UTM', 'Altitud (m)', 'Distancia (m)', 'Azimut (°)', 'Conteo']
     for col in num_cols:
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors='coerce')
 
-    # 3. Crear Periodo de forma segura
+    # 3. Crear columna Periodo (Mes/Año) para series temporales
     if 'Mes' in df.columns and 'Año' in df.columns:
         valid = df['Mes'].notna() & df['Año'].notna()
         df['Periodo'] = ''
@@ -26,7 +27,7 @@ def preprocess_fauna(df: pd.DataFrame) -> pd.DataFrame:
     else:
         df['Periodo'] = 'Sin dato'
 
-    # 4. Manejo de nulos para filtros
+    # 4. Reemplazar nulos en categóricas para evitar errores en filtros
     for col in ['CUA', 'Tipo de registro', 'Zona UTM', 'Clase', 'Familia', 'Departamento', 'Ecozona']:
         if col in df.columns:
             df[col] = df[col].fillna('Sin dato')
