@@ -2,36 +2,35 @@ import streamlit as st
 import pandas as pd
 from src.data_loader import load_raw_data
 from src.preprocessing import preprocess_fauna
-from src.filters import setup_sidebar
+from src.filters import setup_independent_filters
 from src.metrics import compute_kpis
 from src import plots
 
 # Configuración inicial
 st.set_page_config(page_title="Dashboard Fauna Silvestre", layout="wide", page_icon="🌿")
-
 st.title("🌿 Explorador de Registros de Fauna Silvestre")
-st.caption("Inventario Nacional Forestal | Análisis por Unidad Muestral y Atributos Biológicos/Espaciales")
+st.caption("Inventario Nacional Forestal | Filtros independientes por dimensión")
 
-# 1. Carga y Preprocesamiento
+# 1. Carga y Preprocesamiento (dataset completo)
 DATA_PATH = "data/fauna_data.xlsx"
 raw_df = load_raw_data(DATA_PATH)
-df = preprocess_fauna(raw_df)
+df_full = preprocess_fauna(raw_df)
 
-if df.empty:
+if df_full.empty:
     st.error("No se pudo cargar o procesar la base de datos.")
     st.stop()
 
-# 2. Filtros
+# 2. Filtros independientes
 st.divider()
-df_filtered = setup_sidebar(df)
+df_filtered = setup_independent_filters(df_full)
 
 # Verificación post-filtro
 if df_filtered.empty:
-    st.warning("⚠️ No hay datos para la combinación de filtros seleccionada. Ajuste los criterios.")
+    st.warning("⚠️ No hay registros para la combinación de filtros seleccionada. Ajuste los criterios.")
     st.stop()
 
 # 3. Estado y KPIs
-st.info(f"📊 Mostrando **{len(df_filtered):,}** registros filtrados.")
+st.info(f"📊 Mostrando **{len(df_filtered):,}** registros tras aplicar intersección de filtros.")
 kpis = compute_kpis(df_filtered)
 
 cols_kpi = st.columns(4)
@@ -58,7 +57,7 @@ with tab3: plots.plot_spatial(df_filtered)
 # 5. Tabla de Detalle y Descarga
 st.subheader("📋 Tabla de Detalle de Registros")
 cols_table = [
-    'UM_id', 'Departamento', 'Periodo', 'Nombre científico', 'Nombre común', 
+    'UM_id', 'Ecozona', 'Departamento', 'Periodo', 'Nombre científico', 'Nombre común', 
     'Familia', 'Clase', 'Tipo de registro', 'CUA', 'Zona UTM', 
     'Altitud (m)', 'Distancia (m)', 'Número de foto'
 ]
