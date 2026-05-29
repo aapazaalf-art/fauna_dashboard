@@ -1,1 +1,1 @@
-# Paquete fuente
+# Paquete fuente de módulos
