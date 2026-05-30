@@ -6,21 +6,15 @@ from src.filters import setup_independent_filters
 from src.metrics import compute_kpis
 import src.plots as plots
 
-# 🎨 CSS DE ACCESIBILIDAD VISUAL (Baja Visión & Alto Contraste)
+# 🎨 CSS DE ACCESIBILIDAD VISUAL
 st.markdown("""
 <style>
-    /* Tipografía global más grande y oscura */
     .stMarkdown, .stDataFrame, .stMetric, .stSelectbox label, .stMultiSelect label, 
     .stSlider label, .stCheckbox label, .stTabs [data-baseweb="tab-list"] button {
-        font-size: 1.15rem !important;
-        color: #000000 !important;
-        font-family: Arial, sans-serif;
+        font-size: 1.15rem !important; color: #000000 !important; font-family: Arial, sans-serif;
     }
-    /* Bordes definidos para contenedores de gráficos */
     .st-emotion-cache-1y4p8pa { border: 2px solid #2C3E50 !important; border-radius: 10px; padding: 12px; margin: 8px 0; }
-    /* Tablas más legibles */
     .stDataFrame thead th, .stDataFrame tbody td { font-size: 1rem !important; color: #000000 !important; }
-    /* Botones de descarga destacados */
     .stDownloadButton > button { font-size: 1.1rem !important; font-weight: bold; }
 </style>
 """, unsafe_allow_html=True)
@@ -73,12 +67,9 @@ with tabs[4]:
 with tabs[5]:
     st.markdown("### 🔬 Métricas Biológicas Avanzadas")
     c1, c2, c3 = st.columns(3)
-    with c1: 
-        st.container(border=True).plotly_chart(plots.plot_family_richness_by_dept(df_filtered), use_container_width=True)
-    with c2: 
-        st.container(border=True).plotly_chart(plots.plot_cooccurrence_matrix(df_filtered), use_container_width=True)
-    with c3: 
-        st.container(border=True).plotly_chart(plots.plot_cua_taxonomic_impact(df_filtered), use_container_width=True)
+    with c1: st.container(border=True).plotly_chart(plots.plot_family_richness_by_dept(df_filtered), use_container_width=True)
+    with c2: st.container(border=True).plotly_chart(plots.plot_cooccurrence_matrix(df_filtered), use_container_width=True)
+    with c3: st.container(border=True).plotly_chart(plots.plot_cua_taxonomic_impact(df_filtered), use_container_width=True)
 
 # 5️⃣ Tabla de Detalle y Exportación
 st.divider()
