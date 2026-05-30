@@ -48,41 +48,46 @@ metrics_map = {"Total Registros": "📄", "Especies Únicas": "🔬", "Familias 
 for col, (k, v) in zip(cols_kpi, kpis.items()):
     with col: st.metric(label=f"{metrics_map[k]} {k}", value=f"{v:,}")
 
-# 4️⃣ Visualizaciones Interactivas (Renderizado seguro con bordes)
+# 4️⃣ Visualizaciones Interactivas (Con keys únicos para evitar duplicados)
 st.subheader("📊 Visualizaciones Interactivas")
 tabs = st.tabs(["📅 Temporal", "🦎 Taxonómica", "🗺️ Espacial", "🌳 Composición", "📊 CUA", "🔬 Biológicas Avanzadas"])
 
 with tabs[0]:
     with st.container(border=True):
         fig = plots.plot_temporal(df_filtered)
-        st.plotly_chart(fig, use_container_width=True) if fig else st.info("⏳ Sin datos temporales disponibles.")
+        if fig: st.plotly_chart(fig, use_container_width=True, key="plot_temporal_main")
+        else: st.info("⏳ Sin datos temporales disponibles.", key="info_temporal")
 
 with tabs[1]:
     c1, c2 = st.columns(2)
     with c1:
         with st.container(border=True):
             fig = plots.plot_class_dist(df_filtered)
-            st.plotly_chart(fig, use_container_width=True) if fig else st.info("⏳ Sin datos de Clase.")
+            if fig: st.plotly_chart(fig, use_container_width=True, key="plot_class_dist")
+            else: st.info("⏳ Sin datos de Clase.", key="info_class")
     with c2:
         with st.container(border=True):
             fig = plots.plot_top_species(df_filtered, n=10)
-            st.plotly_chart(fig, use_container_width=True) if fig else st.info("⏳ Sin datos de Especies.")
+            if fig: st.plotly_chart(fig, use_container_width=True, key="plot_top_species")
+            else: st.info("⏳ Sin datos de Especies.", key="info_species")
 
 with tabs[2]:
     with st.container(border=True):
         fig = plots.plot_spatial_richness(df_filtered)
-        st.plotly_chart(fig, use_container_width=True) if fig else st.info("⏳ Sin datos de Ecozona.")
+        if fig: st.plotly_chart(fig, use_container_width=True, key="plot_spatial_richness")
+        else: st.info("⏳ Sin datos de Ecozona.", key="info_eco")
 
 with tabs[3]:
     with st.container(border=True):
-        fig = plots.plot_hierarchical_distribution(df_filtered)
-        if fig: st.plotly_chart(fig, use_container_width=True)
-        else: st.info("⏳ Sin datos para jerarquía.")
+        fig = plots.plot_hierarchical_distribution(df_filtered, key_suffix="_comp_tab")
+        if fig: st.plotly_chart(fig, use_container_width=True, key="plot_hierarchical")
+        else: st.info("⏳ Sin datos para jerarquía.", key="info_hier")
 
 with tabs[4]:
     with st.container(border=True):
-        fig = plots.plot_cua_taxonomic_impact(df_filtered)
-        st.plotly_chart(fig, use_container_width=True) if fig else st.info("⏳ Sin datos de CUA.")
+        fig = plots.plot_cua_taxonomic_impact(df_filtered, key_suffix="_cua_tab")
+        if fig: st.plotly_chart(fig, use_container_width=True, key="plot_cua_main")
+        else: st.info("⏳ Sin datos de CUA.", key="info_cua_main")
 
 with tabs[5]:
     st.markdown("### 🔬 Métricas Biológicas Avanzadas")
@@ -90,21 +95,25 @@ with tabs[5]:
     with c1:
         with st.container(border=True):
             fig = plots.plot_family_richness_by_dept(df_filtered)
-            st.plotly_chart(fig, use_container_width=True) if fig else st.info("⏳ Sin datos por Depto.")
+            if fig: st.plotly_chart(fig, use_container_width=True, key="plot_family_dept")
+            else: st.info("⏳ Sin datos por Depto.", key="info_dept")
     with c2:
         with st.container(border=True):
             fig = plots.plot_cooccurrence_matrix(df_filtered)
-            st.plotly_chart(fig, use_container_width=True) if fig else st.info("⏳ Sin datos de co-ocurrencia.")
+            if fig: st.plotly_chart(fig, use_container_width=True, key="plot_cooccurrence")
+            else: st.info("⏳ Sin datos de co-ocurrencia.", key="info_cooc")
     with c3:
         with st.container(border=True):
-            fig = plots.plot_cua_taxonomic_impact(df_filtered)
-            st.plotly_chart(fig, use_container_width=True) if fig else st.info("⏳ Sin datos CUA/Clase.")
+            # ✅ KEY DIFERENTE para la segunda llamada de la misma función
+            fig = plots.plot_cua_taxonomic_impact(df_filtered, key_suffix="_adv_tab")
+            if fig: st.plotly_chart(fig, use_container_width=True, key="plot_cua_advanced")
+            else: st.info("⏳ Sin datos CUA/Clase.", key="info_cua_adv")
 
 # 5️⃣ Tabla de Detalle y Exportación
 st.divider()
 st.subheader("📋 Tabla de Detalle y Exportación Completa")
-st.info(f"📥 **{len(df_filtered):,} registros** coinciden con los filtros activos del sidebar.")
-st.dataframe(df_filtered, use_container_width=True, hide_index=True)
+st.info(f"📥 **{len(df_filtered):,} registros** coinciden con los filtros activos del sidebar.", key="info_export_header")
+st.dataframe(df_filtered, use_container_width=True, hide_index=True, key="df_detail_table")
 
 csv_data = df_filtered.to_csv(index=False).encode('utf-8')
 st.download_button(
@@ -112,6 +121,7 @@ st.download_button(
     data=csv_data,
     file_name=f"fauna_export_{len(df_filtered)}_registros.csv",
     mime="text/csv",
-    use_container_width=True
+    use_container_width=True,
+    key="btn_download_csv"
 )
 st.caption("✅ Se descargan TODAS las filas y columnas que cumplen con los filtros seleccionados.")
