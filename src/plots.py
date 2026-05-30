@@ -53,16 +53,21 @@ def plot_spatial_richness(df: pd.DataFrame):
     fig = px.bar(richness, x='Ecozona', y='Riqueza de Especies', title="🗺️ Riqueza de Especies por Ecozona", color='Riqueza de Especies', color_continuous_scale='Tealgrn', text_auto=True)
     return apply_accessibility(fig)
 
-def plot_hierarchical_distribution(df: pd.DataFrame):
+def plot_hierarchical_distribution(df: pd.DataFrame, key_suffix: str = ""):
+    """Treemap con radio button que acepta key_suffix para evitar duplicados."""
     if df.empty: return None
     st.subheader("🌳 Composición: Ecozona → Departamento → Familia")
-    metric = st.radio("Métrica de concentración:", ["Registros (conteo)", "Especies Únicas"], horizontal=True, key="hier_metric")
+    metric = st.radio("Métrica de concentración:", ["Registros (conteo)", "Especies Únicas"], 
+                      horizontal=True, key=f"hier_metric{key_suffix}")
     if metric == "Registros (conteo)":
         df_plot = df.copy(); df_plot['Valor'] = 1
     else:
         df_plot = df.groupby(['Ecozona', 'Departamento', 'Familia'])['Nombre científico'].nunique().reset_index(name='Valor')
-    fig = px.treemap(df_plot, path=['Ecozona', 'Departamento', 'Familia'], values='Valor', title=f"Concentración por {metric}", color='Ecozona', color_discrete_sequence=px.colors.qualitative.Bold)
-    fig.update_traces(texttemplate='%{label}<br>%{value:.0f}', textposition='middle center', textfont=dict(size=15, color='#111111'))
+    fig = px.treemap(df_plot, path=['Ecozona', 'Departamento', 'Familia'], values='Valor', 
+                     title=f"Concentración por {metric}", color='Ecozona', 
+                     color_discrete_sequence=px.colors.qualitative.Bold)
+    fig.update_traces(texttemplate='%{label}<br>%{value:.0f}', textposition='middle center', 
+                      textfont=dict(size=15, color='#111111'))
     fig.update_layout(margin=dict(t=40, l=20, r=20, b=20))
     return fig
 
@@ -71,7 +76,9 @@ def plot_family_richness_by_dept(df: pd.DataFrame):
     agg = df.groupby(['Departamento', 'Familia'])['Nombre científico'].nunique().reset_index(name='Riqueza')
     top_families = agg.groupby('Familia')['Riqueza'].sum().sort_values(ascending=False).head(15).index
     agg = agg[agg['Familia'].isin(top_families)]
-    fig = px.bar(agg, x='Riqueza', y='Familia', color='Departamento', title="🌿 Riqueza de Familias por Departamento (Top 15)", color_discrete_sequence=px.colors.qualitative.Bold, barmode='stack')
+    fig = px.bar(agg, x='Riqueza', y='Familia', color='Departamento', 
+                 title="🌿 Riqueza de Familias por Departamento (Top 15)", 
+                 color_discrete_sequence=px.colors.qualitative.Bold, barmode='stack')
     fig.update_layout(yaxis={'categoryorder': 'array', 'categoryarray': top_families[::-1]})
     return apply_accessibility(fig)
 
@@ -84,15 +91,21 @@ def plot_cooccurrence_matrix(df: pd.DataFrame):
     pivot = (pivot > 0).astype(int)
     pivot['Total'] = pivot.sum(axis=1)
     pivot = pivot.sort_values('Total', ascending=False).drop('Total', axis=1)
-    fig = px.imshow(pivot, color_continuous_scale=['#F0F0F0', '#D32F2F'], aspect='auto', title="🔗 Matriz de Co-ocurrencia (Top 20 × UM_id)", labels=dict(x="Especies", y="UM_id", color="Presencia"))
+    fig = px.imshow(pivot, color_continuous_scale=['#F0F0F0', '#D32F2F'], aspect='auto', 
+                    title="🔗 Matriz de Co-ocurrencia (Top 20 × UM_id)", 
+                    labels=dict(x="Especies", y="UM_id", color="Presencia"))
     fig.update_layout(xaxis_tickangle=-60, plot_bgcolor='white')
     return apply_accessibility(fig)
 
-def plot_cua_taxonomic_impact(df: pd.DataFrame):
+def plot_cua_taxonomic_impact(df: pd.DataFrame, key_suffix: str = ""):
+    """Gráfico CUA que acepta key_suffix para llamadas múltiples."""
     if df.empty or 'CUA' not in df.columns: return None
     agg = df.groupby(['CUA', 'Clase'])['Nombre científico'].nunique().reset_index(name='Riqueza')
     total_per_cua = agg.groupby('CUA')['Riqueza'].transform('sum')
     agg['Porcentaje'] = (agg['Riqueza'] / total_per_cua * 100).round(1)
-    fig = px.bar(agg, x='CUA', y='Porcentaje', color='Clase', title="🌍 Impacto de CUA por Grupo Taxonómico (%)", color_discrete_sequence=px.colors.qualitative.Set1, text_auto='.1f', barmode='stack')
+    fig = px.bar(agg, x='CUA', y='Porcentaje', color='Clase', 
+                 title="🌍 Impacto de CUA por Grupo Taxonómico (%)", 
+                 color_discrete_sequence=px.colors.qualitative.Set1, 
+                 text_auto='.1f', barmode='stack')
     fig.update_layout(yaxis_title="Porcentaje de Riqueza (%)", yaxis_range=[0, 105])
     return apply_accessibility(fig)
