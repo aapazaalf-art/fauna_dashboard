@@ -48,15 +48,15 @@ metrics_map = {"Total Registros": "📄", "Especies Únicas": "🔬", "Familias 
 for col, (k, v) in zip(cols_kpi, kpis.items()):
     with col: st.metric(label=f"{metrics_map[k]} {k}", value=f"{v:,}")
 
-# 4️⃣ Visualizaciones Interactivas (Con keys únicos para evitar duplicados)
+# 4️⃣ Visualizaciones Interactivas
 st.subheader("📊 Visualizaciones Interactivas")
-tabs = st.tabs(["📅 Temporal", "🦎 Taxonómica", "🗺️ Espacial", "🌳 Composición", "📊 CUA", "🔬 Biológicas Avanzadas"])
+tabs = st.tabs(["📅 Temporal", "🦎 Taxonómica", "🗺️ Espacial", "🌳 Composición", "📊 CUA Visual", "🔬 Biológicas Avanzadas"])
 
 with tabs[0]:
     with st.container(border=True):
         fig = plots.plot_temporal(df_filtered)
         if fig: st.plotly_chart(fig, use_container_width=True, key="plot_temporal_main")
-        else: st.info("⏳ Sin datos temporales disponibles.", key="info_temporal")
+        else: st.info("⏳ Sin datos temporales disponibles.")
 
 with tabs[1]:
     c1, c2 = st.columns(2)
@@ -64,30 +64,30 @@ with tabs[1]:
         with st.container(border=True):
             fig = plots.plot_class_dist(df_filtered)
             if fig: st.plotly_chart(fig, use_container_width=True, key="plot_class_dist")
-            else: st.info("⏳ Sin datos de Clase.", key="info_class")
+            else: st.info("⏳ Sin datos de Clase.")
     with c2:
         with st.container(border=True):
             fig = plots.plot_top_species(df_filtered, n=10)
             if fig: st.plotly_chart(fig, use_container_width=True, key="plot_top_species")
-            else: st.info("⏳ Sin datos de Especies.", key="info_species")
+            else: st.info("⏳ Sin datos de Especies.")
 
 with tabs[2]:
     with st.container(border=True):
         fig = plots.plot_spatial_richness(df_filtered)
         if fig: st.plotly_chart(fig, use_container_width=True, key="plot_spatial_richness")
-        else: st.info("⏳ Sin datos de Ecozona.", key="info_eco")
+        else: st.info("⏳ Sin datos de Ecozona.")
 
 with tabs[3]:
     with st.container(border=True):
         fig = plots.plot_hierarchical_distribution(df_filtered, key_suffix="_comp_tab")
         if fig: st.plotly_chart(fig, use_container_width=True, key="plot_hierarchical")
-        else: st.info("⏳ Sin datos para jerarquía.", key="info_hier")
+        else: st.info("⏳ Sin datos para jerarquía.")
 
-with tabs[4]:
+with tabs[4]:  # ✅ NUEVA PESTAÑA CUA VISUAL
     with st.container(border=True):
-        fig = plots.plot_cua_taxonomic_impact(df_filtered, key_suffix="_cua_tab")
-        if fig: st.plotly_chart(fig, use_container_width=True, key="plot_cua_main")
-        else: st.info("⏳ Sin datos de CUA.", key="info_cua_main")
+        fig = plots.plot_cua_species_visual(df_filtered)
+        if fig: st.plotly_chart(fig, use_container_width=True, key="plot_cua_visual")
+        else: st.info("⏳ Sin datos de CUA.")
 
 with tabs[5]:
     st.markdown("### 🔬 Métricas Biológicas Avanzadas")
@@ -96,24 +96,23 @@ with tabs[5]:
         with st.container(border=True):
             fig = plots.plot_family_richness_by_dept(df_filtered)
             if fig: st.plotly_chart(fig, use_container_width=True, key="plot_family_dept")
-            else: st.info("⏳ Sin datos por Depto.", key="info_dept")
+            else: st.info("⏳ Sin datos por Depto.")
     with c2:
         with st.container(border=True):
             fig = plots.plot_cooccurrence_matrix(df_filtered)
             if fig: st.plotly_chart(fig, use_container_width=True, key="plot_cooccurrence")
-            else: st.info("⏳ Sin datos de co-ocurrencia.", key="info_cooc")
+            else: st.info("⏳ Sin datos de co-ocurrencia.")
     with c3:
         with st.container(border=True):
-            # ✅ KEY DIFERENTE para la segunda llamada de la misma función
-            fig = plots.plot_cua_taxonomic_impact(df_filtered, key_suffix="_adv_tab")
+            fig = plots.plot_cua_taxonomic_impact(df_filtered, key_suffix="_adv_tab") if hasattr(plots, 'plot_cua_taxonomic_impact') else None
             if fig: st.plotly_chart(fig, use_container_width=True, key="plot_cua_advanced")
-            else: st.info("⏳ Sin datos CUA/Clase.", key="info_cua_adv")
+            else: st.info("⏳ Sin datos CUA/Clase.")
 
 # 5️⃣ Tabla de Detalle y Exportación
 st.divider()
 st.subheader("📋 Tabla de Detalle y Exportación Completa")
-st.info(f"📥 **{len(df_filtered):,} registros** coinciden con los filtros activos del sidebar.", key="info_export_header")
-st.dataframe(df_filtered, use_container_width=True, hide_index=True, key="df_detail_table")
+st.info(f"📥 **{len(df_filtered):,} registros** coinciden con los filtros activos del sidebar.")
+st.dataframe(df_filtered, use_container_width=True, hide_index=True)
 
 csv_data = df_filtered.to_csv(index=False).encode('utf-8')
 st.download_button(
