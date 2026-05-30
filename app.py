@@ -48,28 +48,57 @@ metrics_map = {"Total Registros": "📄", "Especies Únicas": "🔬", "Familias 
 for col, (k, v) in zip(cols_kpi, kpis.items()):
     with col: st.metric(label=f"{metrics_map[k]} {k}", value=f"{v:,}")
 
-# 4️⃣ Visualizaciones Interactivas (Con bordes y accesibilidad)
+# 4️⃣ Visualizaciones Interactivas (Renderizado seguro con bordes)
 st.subheader("📊 Visualizaciones Interactivas")
 tabs = st.tabs(["📅 Temporal", "🦎 Taxonómica", "🗺️ Espacial", "🌳 Composición", "📊 CUA", "🔬 Biológicas Avanzadas"])
 
 with tabs[0]:
-    with st.container(border=True): plots.plot_temporal(df_filtered)
+    with st.container(border=True):
+        fig = plots.plot_temporal(df_filtered)
+        st.plotly_chart(fig, use_container_width=True) if fig else st.info("⏳ Sin datos temporales disponibles.")
+
 with tabs[1]:
     c1, c2 = st.columns(2)
-    with c1: st.container(border=True).plotly_chart(plots.plot_class_dist(df_filtered), use_container_width=True)
-    with c2: st.container(border=True).plotly_chart(plots.plot_top_species(df_filtered, n=10), use_container_width=True)
+    with c1:
+        with st.container(border=True):
+            fig = plots.plot_class_dist(df_filtered)
+            st.plotly_chart(fig, use_container_width=True) if fig else st.info("⏳ Sin datos de Clase.")
+    with c2:
+        with st.container(border=True):
+            fig = plots.plot_top_species(df_filtered, n=10)
+            st.plotly_chart(fig, use_container_width=True) if fig else st.info("⏳ Sin datos de Especies.")
+
 with tabs[2]:
-    with st.container(border=True): plots.plot_spatial_richness(df_filtered)
+    with st.container(border=True):
+        fig = plots.plot_spatial_richness(df_filtered)
+        st.plotly_chart(fig, use_container_width=True) if fig else st.info("⏳ Sin datos de Ecozona.")
+
 with tabs[3]:
-    with st.container(border=True): plots.plot_hierarchical_distribution(df_filtered)
+    with st.container(border=True):
+        fig = plots.plot_hierarchical_distribution(df_filtered)
+        if fig: st.plotly_chart(fig, use_container_width=True)
+        else: st.info("⏳ Sin datos para jerarquía.")
+
 with tabs[4]:
-    with st.container(border=True): plots.plot_cua_taxonomic_impact(df_filtered)
+    with st.container(border=True):
+        fig = plots.plot_cua_taxonomic_impact(df_filtered)
+        st.plotly_chart(fig, use_container_width=True) if fig else st.info("⏳ Sin datos de CUA.")
+
 with tabs[5]:
     st.markdown("### 🔬 Métricas Biológicas Avanzadas")
     c1, c2, c3 = st.columns(3)
-    with c1: st.container(border=True).plotly_chart(plots.plot_family_richness_by_dept(df_filtered), use_container_width=True)
-    with c2: st.container(border=True).plotly_chart(plots.plot_cooccurrence_matrix(df_filtered), use_container_width=True)
-    with c3: st.container(border=True).plotly_chart(plots.plot_cua_taxonomic_impact(df_filtered), use_container_width=True)
+    with c1:
+        with st.container(border=True):
+            fig = plots.plot_family_richness_by_dept(df_filtered)
+            st.plotly_chart(fig, use_container_width=True) if fig else st.info("⏳ Sin datos por Depto.")
+    with c2:
+        with st.container(border=True):
+            fig = plots.plot_cooccurrence_matrix(df_filtered)
+            st.plotly_chart(fig, use_container_width=True) if fig else st.info("⏳ Sin datos de co-ocurrencia.")
+    with c3:
+        with st.container(border=True):
+            fig = plots.plot_cua_taxonomic_impact(df_filtered)
+            st.plotly_chart(fig, use_container_width=True) if fig else st.info("⏳ Sin datos CUA/Clase.")
 
 # 5️⃣ Tabla de Detalle y Exportación
 st.divider()
