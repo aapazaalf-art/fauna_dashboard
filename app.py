@@ -6,10 +6,30 @@ from src.filters import setup_independent_filters
 from src.metrics import compute_kpis
 import src.plots as plots
 
+# 🎨 CSS DE ACCESIBILIDAD VISUAL (Baja Visión & Alto Contraste)
+st.markdown("""
+<style>
+    /* Tipografía global más grande y oscura */
+    .stMarkdown, .stDataFrame, .stMetric, .stSelectbox label, .stMultiSelect label, 
+    .stSlider label, .stCheckbox label, .stTabs [data-baseweb="tab-list"] button {
+        font-size: 1.15rem !important;
+        color: #000000 !important;
+        font-family: Arial, sans-serif;
+    }
+    /* Bordes definidos para contenedores de gráficos */
+    .st-emotion-cache-1y4p8pa { border: 2px solid #2C3E50 !important; border-radius: 10px; padding: 12px; margin: 8px 0; }
+    /* Tablas más legibles */
+    .stDataFrame thead th, .stDataFrame tbody td { font-size: 1rem !important; color: #000000 !important; }
+    /* Botones de descarga destacados */
+    .stDownloadButton > button { font-size: 1.1rem !important; font-weight: bold; }
+</style>
+""", unsafe_allow_html=True)
+
 st.set_page_config(page_title="Dashboard Fauna Silvestre", layout="wide", page_icon="🌿")
 st.title("🌿 Explorador de Registros de Fauna Silvestre")
-st.caption("Inventario Nacional Forestal | Filtros independientes y análisis de composición")
+st.caption("Inventario Nacional Forestal | Accesibilidad mejorada y métricas biológicas avanzadas")
 
+# 1️⃣ Carga y Preprocesamiento
 DATA_PATH = "data/fauna_data.xlsx"
 raw_df = load_raw_data(DATA_PATH)
 df_full = preprocess_fauna(raw_df)
@@ -18,6 +38,7 @@ if df_full.empty:
     st.error("❌ No se pudo cargar o procesar la base de datos.")
     st.stop()
 
+# 2️⃣ Filtros Independientes
 st.divider()
 df_filtered = setup_independent_filters(df_full)
 
@@ -25,6 +46,7 @@ if df_filtered.empty:
     st.warning("⚠️ No hay registros para la combinación de filtros seleccionada.")
     st.stop()
 
+# 3️⃣ KPIs Dinámicos
 st.info(f"📊 Mostrando **{len(df_filtered):,}** registros tras aplicar intersección de filtros.")
 kpis = compute_kpis(df_filtered)
 cols_kpi = st.columns(4)
@@ -32,21 +54,33 @@ metrics_map = {"Total Registros": "📄", "Especies Únicas": "🔬", "Familias 
 for col, (k, v) in zip(cols_kpi, kpis.items()):
     with col: st.metric(label=f"{metrics_map[k]} {k}", value=f"{v:,}")
 
+# 4️⃣ Visualizaciones Interactivas (Con bordes y accesibilidad)
 st.subheader("📊 Visualizaciones Interactivas")
-try:
-    tabs = st.tabs(["📅 Temporal", "🦎 Taxonómica", "🗺️ Espacial (Riqueza)", "🌳 Composición", "📊 CUA"])
-    with tabs[0]: plots.plot_temporal(df_filtered)
-    with tabs[1]:
-        c1, c2 = st.columns(2)
-        with c1: plots.plot_class_dist(df_filtered)
-        with c2: plots.plot_top_species(df_filtered, n=10)
-    with tabs[2]: plots.plot_spatial_richness(df_filtered)  # ✅ LLAMADA EXACTA
-    with tabs[3]: plots.plot_hierarchical_distribution(df_filtered)
-    with tabs[4]: plots.plot_cua_species(df_filtered)
-except Exception as e:
-    st.error(f"❌ Error al renderizar gráficos: {e}")
-    st.caption("Revise los logs de Streamlit para depurar columnas faltantes.")
+tabs = st.tabs(["📅 Temporal", "🦎 Taxonómica", "🗺️ Espacial", "🌳 Composición", "📊 CUA", "🔬 Biológicas Avanzadas"])
 
+with tabs[0]:
+    with st.container(border=True): plots.plot_temporal(df_filtered)
+with tabs[1]:
+    c1, c2 = st.columns(2)
+    with c1: st.container(border=True).plotly_chart(plots.plot_class_dist(df_filtered), use_container_width=True)
+    with c2: st.container(border=True).plotly_chart(plots.plot_top_species(df_filtered, n=10), use_container_width=True)
+with tabs[2]:
+    with st.container(border=True): plots.plot_spatial_richness(df_filtered)
+with tabs[3]:
+    with st.container(border=True): plots.plot_hierarchical_distribution(df_filtered)
+with tabs[4]:
+    with st.container(border=True): plots.plot_cua_taxonomic_impact(df_filtered)
+with tabs[5]:
+    st.markdown("### 🔬 Métricas Biológicas Avanzadas")
+    c1, c2, c3 = st.columns(3)
+    with c1: 
+        st.container(border=True).plotly_chart(plots.plot_family_richness_by_dept(df_filtered), use_container_width=True)
+    with c2: 
+        st.container(border=True).plotly_chart(plots.plot_cooccurrence_matrix(df_filtered), use_container_width=True)
+    with c3: 
+        st.container(border=True).plotly_chart(plots.plot_cua_taxonomic_impact(df_filtered), use_container_width=True)
+
+# 5️⃣ Tabla de Detalle y Exportación
 st.divider()
 st.subheader("📋 Tabla de Detalle y Exportación Completa")
 st.info(f"📥 **{len(df_filtered):,} registros** coinciden con los filtros activos del sidebar.")
@@ -60,4 +94,4 @@ st.download_button(
     mime="text/csv",
     use_container_width=True
 )
-st.caption("✅ Se descargan TODAS las filas y columnas que cumplen con los filtros seleccionados, sin recortes ni limitaciones visuales.")
+st.caption("✅ Se descargan TODAS las filas y columnas que cumplen con los filtros seleccionados.")
