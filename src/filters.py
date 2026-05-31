@@ -2,7 +2,8 @@ import streamlit as st
 import pandas as pd
 
 def setup_independent_filters(df: pd.DataFrame) -> pd.DataFrame:
-    st.sidebar.header("🔍 Filtros")
+    """Filtros independientes calculados desde el dataset completo."""
+    st.sidebar.header("🔍 Filtros de Exploración")
     
     opts = {
         'UM_id': sorted(df['UM_id'].dropna().unique().tolist()),
@@ -15,14 +16,14 @@ def setup_independent_filters(df: pd.DataFrame) -> pd.DataFrame:
         'CUA': sorted(df['CUA'].dropna().unique().tolist())
     }
     
-    sel_um = st.sidebar.multiselect("UM_id", options=opts['UM_id'], default=[])
-    sel_dept = st.sidebar.multiselect("Departamento", options=opts['Departamento'], default=[])
-    sel_eco = st.sidebar.multiselect("Ecozona", options=opts['Ecozona'], default=[])
-    sel_year = st.sidebar.multiselect("Año", options=opts['Año'], default=[])
-    sel_mes = st.sidebar.multiselect("Mes", options=opts['Mes'], default=[])
-    sel_class = st.sidebar.multiselect("Clase", options=opts['Clase'], default=[])
-    sel_fam = st.sidebar.multiselect("Familia", options=opts['Familia'], default=[])
-    sel_cua = st.sidebar.multiselect("CUA", options=opts['CUA'], default=[])
+    sel_um = st.sidebar.multiselect("📍 UM_id", options=opts['UM_id'], default=[])
+    sel_dept = st.sidebar.multiselect("🏛️ Departamento", options=opts['Departamento'], default=[])
+    sel_eco = st.sidebar.multiselect("🌍 Ecozona", options=opts['Ecozona'], default=[])
+    sel_year = st.sidebar.multiselect("📅 Año", options=opts['Año'], default=[])
+    sel_mes = st.sidebar.multiselect("🗓️ Mes", options=opts['Mes'], default=[])
+    sel_class = st.sidebar.multiselect("🦎 Clase", options=opts['Clase'], default=[])
+    sel_fam = st.sidebar.multiselect("🌿 Familia", options=opts['Familia'], default=[])
+    sel_cua = st.sidebar.multiselect("📊 CUA", options=opts['CUA'], default=[])
     
     mask = pd.Series(True, index=df.index)
     if sel_um: mask &= df['UM_id'].isin(sel_um)
