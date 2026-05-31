@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 
 def preprocess_fauna(df: pd.DataFrame) -> pd.DataFrame:
+    """Limpieza, tipado seguro y variables derivadas."""
     df = df.copy()
     
     # Normalizar texto
