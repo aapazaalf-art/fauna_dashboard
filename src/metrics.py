@@ -1,4 +1,5 @@
 def compute_kpis(df: pd.DataFrame) -> dict:
+    """Indicadores clave recalculables."""
     return {
         "Total Registros": len(df),
         "Especies Únicas": df['Nombre científico'].nunique(),
